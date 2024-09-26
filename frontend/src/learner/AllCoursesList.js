@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import {Link, useNavigate} from "react-router-dom"; // Import useNavigate from react-router-dom
+import DOMPurify from "dompurify"; // Import DOMPurify for sanitization
 
 function AllCourses() {
   const [courses, setCourses] = useState([]);
@@ -18,15 +19,18 @@ function AllCourses() {
       let response;
       if (activeTab === "approved") {
         response = await axios.get(
-          "http://localhost:4003/api/v1/course/getApproved"
+          // IT21470004 - XSS Code Level Fix
+          DOMPurify.sanitize("http://localhost:4003/api/v1/course/getApproved")
         );
       } else if (activeTab === "pending") {
         response = await axios.get(
-          "http://localhost:4003/api/v1/course/getPending"
+          // IT21470004 - XSS Code Level Fix
+          DOMPurify.sanitize("http://localhost:4003/api/v1/course/getPending")
         );
       } else if (activeTab === "rejected") {
         response = await axios.get(
-          "http://localhost:4003/api/v1/course/getRejected"
+          // IT21470004 - XSS Code Level Fix
+          DOMPurify.sanitize("http://localhost:4003/api/v1/course/getRejected")
         );
       }
       setCourses(response.data);
@@ -41,8 +45,11 @@ function AllCourses() {
     const learnerId = "123f55396a149b001f8a1234";
     try {
       const response = await axios.post(
-        `http://localhost:4002/learner/course/enroll?courseId=${courseId}`,
-        { learnerId }
+        // IT21470004 - XSS Code Level Fix
+        DOMPurify.sanitize(
+          `http://localhost:4002/learner/course/enroll?courseId=${courseId}`
+        ),
+        {learnerId}
       );
       console.log(response.data.message);
       // Redirect to Success.js after successful enrollment
@@ -51,8 +58,6 @@ function AllCourses() {
       } else {
         navigate("/enroll/unsuccess");
       }
-
-      response.status(400).json({ message: "Student enrolled successfully" });
     } catch (error) {
       console.error("Error enrolling:", error);
       // Handle error
@@ -77,6 +82,7 @@ function AllCourses() {
   }
 
   return (
+    // IT21470004 - XSS Code Level Fixes
     <div className="container mx-auto">
       <h1 className="mb-6 text-3xl font-semibold">Course List</h1>
       {/* Tab navigation */}
@@ -115,25 +121,33 @@ function AllCourses() {
           >
             <div className="p-6">
               <h2 className="mb-2 text-xl font-semibold">
-                {course.CourseName}
+                {DOMPurify.sanitize(course.CourseName)}
               </h2>
               {course.preview && (
                 <img
-                  src={`http://localhost:4003/${course.preview.replace(
-                    "\\",
-                    "/"
-                  )}`}
+                  src={DOMPurify.sanitize(
+                    `http://localhost:4003/${course.preview.replace("\\", "/")}`
+                  )}
                   alt="Preview"
                   className="w-full mb-2 rounded-md cursor-pointer"
                   onClick={() => handleViewDetails(course._id)}
                 />
               )}
               {expandedCourseId === course._id && (
+                // IT21470004 - XSS Code Level Fixes
                 <div>
-                  <p className="mb-2">Instructor: {course.instructor}</p>
-                  <p className="mb-2">Description: {course.description}</p>
-                  <p className="mb-2">Duration: {course.duration}</p>
-                  <p className="mb-2">Level: {course.level}</p>
+                  <p className="mb-2">
+                    Instructor: {DOMPurify.sanitize(course.instructor)}
+                  </p>
+                  <p className="mb-2">
+                    Description: {DOMPurify.sanitize(course.description)}
+                  </p>
+                  <p className="mb-2">
+                    Duration: {DOMPurify.sanitize(course.duration)}
+                  </p>
+                  <p className="mb-2">
+                    Level: {DOMPurify.sanitize(course.level)}
+                  </p>
                   <p className="mb-2">Price: ${course.price}</p>
                   <h3 className="mb-2 text-lg font-semibold">Lessons:</h3>
                   <ul className="pl-6 list-disc">
@@ -141,11 +155,11 @@ function AllCourses() {
                       <li key={lessonIndex}>
                         <div className="mb-2">
                           <span className="font-semibold">Title:</span>{" "}
-                          {lesson.title}
+                          {DOMPurify.sanitize(lesson.title)}
                         </div>
                         <div className="mb-2">
                           <span className="font-semibold">Description:</span>{" "}
-                          {lesson.description}
+                          {DOMPurify.sanitize(lesson.description)}
                         </div>
                       </li>
                     ))}
@@ -153,11 +167,14 @@ function AllCourses() {
                   <p className="mb-2">
                     Lecture Notes:{" "}
                     {course.lectureNotes && (
+                      // IT21470004 - XSS Code Level Fixes
                       <a
-                        href={`http://localhost:4003/${course.lectureNotes.replace(
-                          "\\",
-                          "/"
-                        )}`}
+                        href={DOMPurify.sanitize(
+                          `http://localhost:4003/${course.lectureNotes.replace(
+                            "\\",
+                            "/"
+                          )}`
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline"
@@ -169,11 +186,14 @@ function AllCourses() {
                   <p className="mb-2">
                     Lecture Videos:{" "}
                     {course.lectureVideos && (
+                      // IT21470004 - XSS Code Level Fixes
                       <a
-                        href={`http://localhost:4003/${course.lectureVideos.replace(
-                          "\\",
-                          "/"
-                        )}`}
+                        href={DOMPurify.sanitize(
+                          `http://localhost:4003/${course.lectureVideos.replace(
+                            "\\",
+                            "/"
+                          )}`
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline"
