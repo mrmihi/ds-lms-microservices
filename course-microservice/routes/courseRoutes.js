@@ -4,7 +4,6 @@ const Course = require("../models/Course");
 const path = require("path");
 const multer = require("multer");
 const axios = require("axios");
-const sanitize = require("sanitize-html");
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -75,9 +74,7 @@ router.post(
       const totalLessons = lessons.length;
       courseData.totalLessons = totalLessons;
 
-      const sanitizedCourseData = sanitize(courseData);
-
-      const course = new Course(sanitizedCourseData);
+      const course = new Course(courseData);
       await course.save();
 
       res.status(201).send(course);
@@ -143,28 +140,10 @@ router.put("/update/:courseId", async (req, res) => {
       return res.status(404).send({ error: "Course not found" });
     }
 
-    const sanitizedCourse = {
-      title: sanitize(course.InstructorId),
-      description: sanitize(course.CourseName),
-      content: sanitize(course.instructor),
-      content: sanitize(course.description),
-      content: sanitize(course.duration),
-      content: sanitize(course.level),
-      content: sanitize(course.price),
-      content: sanitize(course.lectureNotes),
-      content: sanitize(course.status),
-      content: sanitize(course.lectureVideos),
-      content: sanitize(course.preview),
-      content: sanitize(course.lessons),
-      content: sanitize(course.totalLessons),
-    };Í
-
     // If the course exists, send it as a response
-    res
-      .status(200)
-      .send({message: "Course updated successfully", sanitizedCourse});
+    res.status(200).send({ message: "Course updated successfully", course });
   } catch (error) {
-    res.status(500).send({error: "Error updating course"});
+    res.status(500).send({ error: "Error updating course" });
   }
 });
 
@@ -222,10 +201,10 @@ router.post("/reject/:courseId", async (req, res) => {
     });
 
     // If the course exists, send it as a response
-    res.status(200).send({message: "Course rejected successfully", course});
+    res.status(200).send({ message: "Course rejected successfully", course });
   } catch (error) {
     // If there's an error, send an error response
-    res.status(500).send({error: "Error rejecting course"});
+    res.status(500).send({ error: "Error rejecting course" });
   }
 });
 
