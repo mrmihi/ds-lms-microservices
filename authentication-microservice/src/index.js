@@ -1,10 +1,17 @@
 import { config } from "dotenv";
-import { config } from "dotenv";
 import express from "express";
 import passport from "passport";
 import session from "express-session";
 import { connectDB } from "../configs/DBConnect.js";
 import { login, register, googleAuthCallback } from "./controllers/auth.controller.js";
+import rateLimit from "express-rate-limit";
+
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: { message: "Too many login attempts, please try again later." },
+});
 
 config();
 
@@ -48,7 +55,7 @@ connectDB()
   });
 
 // Login and Register Routes
-authService.post("/login", login);
+authService.post("/login", loginLimiter, login);
 authService.post("/register", register);
 
 // Google OAuth Routes
