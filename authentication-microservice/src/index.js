@@ -1,10 +1,10 @@
 import { config } from "dotenv";
-import { config } from "dotenv";
 import express from "express";
 import passport from "passport";
 import session from "express-session";
 import { connectDB } from "../configs/DBConnect.js";
 import { login, register, googleAuthCallback } from "./controllers/auth.controller.js";
+import helmet from "helmet";
 
 config();
 
